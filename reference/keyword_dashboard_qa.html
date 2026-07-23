@@ -1,0 +1,338 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Medhavi Keyword QA Dashboard</title>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: 'IBM Plex Sans', -apple-system, sans-serif; background: #f5f5f0; color: #222; }
+.container { max-width: 1140px; margin: 0 auto; padding: 24px; }
+.login-wrap { max-width: 440px; margin: 100px auto; }
+.login-wrap h2 { font-size: 24px; font-weight: 700; margin-bottom: 4px; }
+.login-wrap p { color: #777; font-size: 14px; margin-bottom: 28px; }
+.login-wrap label { font-size: 13px; font-weight: 600; color: #555; display: block; margin-bottom: 4px; }
+.login-wrap input { width: 100%; padding: 10px 14px; border: 1.5px solid #ddd; border-radius: 8px; font-size: 14px; margin-bottom: 16px; font-family: inherit; outline: none; }
+.login-wrap input:focus { border-color: #111; }
+.login-wrap button { width: 100%; padding: 13px; background: #111; color: #fff; border: none; border-radius: 8px; font-size: 15px; font-weight: 600; cursor: pointer; font-family: inherit; }
+.login-wrap button:hover { background: #333; }
+.error-msg { color: #dc2626; font-size: 13px; margin-bottom: 12px; }
+.header { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 4px; }
+.header h1 { font-size: 22px; font-weight: 700; letter-spacing: -0.02em; }
+.header .sub { color: #888; font-size: 13px; margin-top: 2px; }
+.refresh-btn { background: none; border: 1.5px solid #ddd; border-radius: 6px; padding: 6px 16px; font-size: 13px; cursor: pointer; color: #555; font-family: inherit; }
+.refresh-btn:hover { border-color: #999; }
+.cards { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin: 20px 0; }
+.card { border-radius: 12px; padding: 18px 20px; }
+.card .num { font-size: 32px; font-weight: 700; }
+.card .label { font-size: 12px; color: #555; margin-top: 2px; }
+.card-green { background: #f0faf0; border: 1px solid #c8e6c8; }
+.card-green .num { color: #166534; }
+.card-red { background: #fef5f5; border: 1px solid #f0d0d0; }
+.card-red .num { color: #991b1b; }
+.card-amber { background: #fffbf0; border: 1px solid #f0e4c0; }
+.card-amber .num { color: #92400e; }
+.card-gray { background: #f8f8fa; border: 1px solid #e0e0e8; }
+.card-gray .num { color: #333; }
+.models { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin: 0 0 20px; }
+.model-card { border: 1px solid #e8e8e8; border-radius: 12px; padding: 16px 18px; background: #fff; }
+.model-card .model-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px; }
+.model-card .model-name { font-size: 13px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; color: #444; }
+.model-card .model-count { font-size: 12px; }
+.model-card .model-avg { font-size: 30px; font-weight: 700; color: #111; }
+.model-card .model-detail { font-size: 11px; color: #999; margin-top: 2px; }
+.consensus-section { margin: 0 0 20px; }
+.consensus-label { font-size: 13px; font-weight: 600; color: #444; margin-bottom: 6px; }
+.consensus-bar { display: flex; height: 34px; border-radius: 8px; overflow: hidden; border: 1px solid #e0e0e0; }
+.consensus-bar div { display: flex; align-items: center; justify-content: center; color: #fff; font-size: 12px; font-weight: 700; transition: width 0.4s ease; }
+.bar-pass { background: #22c55e; }
+.bar-fail { background: #ef4444; }
+.bar-disagree { background: #f59e0b; }
+.consensus-legend { display: flex; gap: 18px; margin-top: 6px; font-size: 11px; color: #777; }
+.legend-dot { display: inline-block; width: 8px; height: 8px; border-radius: 50%; margin-right: 4px; vertical-align: middle; }
+.filters { display: flex; gap: 8px; margin: 0 0 14px; align-items: center; flex-wrap: wrap; }
+.filter-btn { padding: 6px 16px; border-radius: 6px; font-size: 12px; font-weight: 600; cursor: pointer; border: 1.5px solid #ddd; background: #fff; color: #555; font-family: inherit; }
+.filter-btn:hover { border-color: #aaa; }
+.filter-btn.active { border: 2px solid #111; background: #111; color: #fff; }
+.search-input { margin-left: auto; padding: 7px 14px; border: 1.5px solid #ddd; border-radius: 6px; font-size: 13px; width: 220px; outline: none; font-family: inherit; }
+.search-input:focus { border-color: #111; }
+.table-wrap { border: 1px solid #e4e4e4; border-radius: 12px; overflow: hidden; background: #fff; }
+table { width: 100%; border-collapse: collapse; font-size: 13px; }
+thead tr { background: #fafafa; border-bottom: 1px solid #e4e4e4; }
+th { text-align: left; padding: 11px 14px; font-weight: 600; color: #666; font-size: 12px; }
+th.center { text-align: center; }
+td { padding: 11px 14px; border-bottom: 1px solid #f3f3f3; }
+td.center { text-align: center; }
+tr.clickable { cursor: pointer; transition: background 0.15s; }
+tr.clickable:hover { background: #f8f9ff; }
+.term-name { font-weight: 500; color: #222; }
+.term-slug { font-size: 11px; color: #aaa; font-family: 'IBM Plex Mono', monospace; }
+.score { font-weight: 700; font-size: 15px; font-family: 'IBM Plex Mono', monospace; }
+.score-green { color: #16a34a; }
+.score-blue { color: #2563eb; }
+.score-amber { color: #d97706; }
+.score-red { color: #dc2626; }
+.score-gray { color: #aaa; }
+.consensus-pill { padding: 3px 12px; border-radius: 12px; font-size: 11px; font-weight: 600; display: inline-block; }
+.pill-pass { background: #dcfce7; color: #166534; }
+.pill-fail { background: #fee2e2; color: #991b1b; }
+.pill-disagree { background: #fef3c7; color: #92400e; }
+.pill-default { background: #f3f4f6; color: #555; }
+.empty-row { text-align: center; padding: 40px; color: #aaa; font-size: 14px; }
+
+/* Modal overlay */
+.modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 1000; justify-content: center; align-items: center; backdrop-filter: blur(2px); }
+.modal-overlay.open { display: flex; }
+.modal { background: #fff; border-radius: 16px; width: 90%; max-width: 780px; max-height: 85vh; overflow-y: auto; padding: 28px 32px; box-shadow: 0 20px 60px rgba(0,0,0,0.25); position: relative; }
+.modal-close { position: absolute; top: 16px; right: 20px; background: none; border: none; font-size: 22px; cursor: pointer; color: #999; width: 36px; height: 36px; border-radius: 50%; display: flex; align-items: center; justify-content: center; }
+.modal-close:hover { background: #f0f0f0; color: #333; }
+.modal-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 6px; padding-right: 40px; }
+.modal-title { font-size: 20px; font-weight: 700; color: #111; }
+.modal-meta { display: flex; gap: 12px; align-items: center; margin-bottom: 16px; font-size: 12px; color: #888; }
+.modal-meta .cat { background: #f0f0f5; color: #555; padding: 3px 10px; border-radius: 6px; font-weight: 500; }
+.modal-def { font-size: 14px; color: #444; line-height: 1.75; margin-bottom: 20px; padding: 16px 18px; background: #fafaf8; border: 1px solid #eee; border-radius: 10px; }
+.modal-avg { display: flex; align-items: center; gap: 12px; margin-bottom: 18px; padding-bottom: 18px; border-bottom: 1px solid #eee; }
+.modal-avg-label { font-size: 13px; color: #888; }
+.modal-avg-score { font-size: 28px; font-weight: 700; font-family: 'IBM Plex Mono', monospace; }
+.modal-models { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
+.modal-model { border: 1.5px solid #e8e8e8; border-radius: 12px; padding: 16px 18px; background: #fff; transition: border-color 0.2s; }
+.modal-model:hover { border-color: #ccc; }
+.modal-model-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
+.modal-model-name { font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em; color: #555; }
+.modal-model-score { font-size: 26px; font-weight: 700; font-family: 'IBM Plex Mono', monospace; }
+.modal-model-tag { font-size: 12px; margin-bottom: 6px; }
+.modal-model-tag span { font-weight: 600; }
+.tag-good { color: #16a34a; }
+.tag-bad { color: #d97706; }
+.tag-worse { color: #dc2626; }
+.modal-model-issue { font-size: 12px; color: #666; line-height: 1.6; }
+
+@media (max-width: 768px) {
+  .cards { grid-template-columns: repeat(2, 1fr); }
+  .models { grid-template-columns: 1fr; }
+  .modal-models { grid-template-columns: 1fr; }
+  .modal { width: 95%; padding: 20px; }
+  .filters { flex-direction: column; align-items: stretch; }
+  .search-input { margin-left: 0; width: 100%; }
+}
+</style>
+</head>
+<body>
+
+<div id="login-screen" class="login-wrap">
+  <h2>Medhavi keyword QA</h2>
+  <p>Connect to Supabase to view your ensemble scoring results.</p>
+  <label>Supabase URL</label>
+  <input id="sb-url" placeholder="https://abc123.supabase.co" value="">
+  <label>Supabase key (anon or service role)</label>
+  <input id="sb-key" type="password" placeholder="eyJhbG...">
+  <div id="login-error" class="error-msg" style="display:none"></div>
+  <button onclick="connect()">Connect</button>
+</div>
+
+<div id="dashboard" class="container" style="display:none">
+  <div class="header">
+    <div>
+      <h1>Medhavi keyword QA</h1>
+      <div class="sub" id="subtitle"></div>
+    </div>
+    <button class="refresh-btn" onclick="refresh()">Refresh</button>
+  </div>
+  <div class="cards" id="summary-cards"></div>
+  <div class="models" id="model-cards"></div>
+  <div class="consensus-section">
+    <div class="consensus-label">Consensus distribution</div>
+    <div class="consensus-bar" id="consensus-bar"></div>
+    <div class="consensus-legend" id="consensus-legend"></div>
+  </div>
+  <div class="filters" id="filters"></div>
+  <div class="table-wrap">
+    <table>
+      <thead>
+        <tr>
+          <th>Keyword</th>
+          <th>Category</th>
+          <th class="center" style="width:65px">Gemini</th>
+          <th class="center" style="width:65px">Mistral</th>
+          <th class="center" style="width:65px">OpenAI</th>
+          <th class="center" style="width:55px">Avg</th>
+          <th class="center" style="width:100px">Consensus</th>
+        </tr>
+      </thead>
+      <tbody id="table-body"></tbody>
+    </table>
+  </div>
+</div>
+
+<!-- Modal -->
+<div class="modal-overlay" id="modal-overlay" onclick="closeModal(event)">
+  <div class="modal" id="modal-content" onclick="event.stopPropagation()">
+    <button class="modal-close" onclick="closeModalDirect()">&times;</button>
+    <div id="modal-body"></div>
+  </div>
+</div>
+
+<script>
+let ROWS = [];
+let SB_URL = "";
+let SB_KEY = "";
+let currentFilter = "ALL";
+let currentSearch = "";
+
+function scoreClass(s) {
+  if (s == null || s < 0) return "score-gray";
+  if (s >= 90) return "score-green";
+  if (s >= 70) return "score-blue";
+  if (s >= 50) return "score-amber";
+  return "score-red";
+}
+function scoreColor(s) {
+  if (s == null || s < 0) return "#aaa";
+  if (s >= 90) return "#16a34a";
+  if (s >= 70) return "#2563eb";
+  if (s >= 50) return "#d97706";
+  return "#dc2626";
+}
+function pillClass(c) {
+  if (c === "ALL_PASS") return "pill-pass";
+  if (c === "ALL_FAIL") return "pill-fail";
+  if (c === "DISAGREE") return "pill-disagree";
+  return "pill-default";
+}
+function scoreDisplay(s) { return (s != null && s >= 0) ? s : "\u2014"; }
+function tagClass(t) {
+  if (!t || t === "none") return "tag-good";
+  if (t === "off_topic" || t === "incorrect_term") return "tag-worse";
+  return "tag-bad";
+}
+
+async function fetchRows() {
+  const res = await fetch(
+    SB_URL + "/rest/v1/keyword_scores_test?select=*&order=id.asc&limit=500",
+    { headers: { apikey: SB_KEY, Authorization: "Bearer " + SB_KEY } }
+  );
+  if (!res.ok) throw new Error("HTTP " + res.status + ": " + (await res.text()).slice(0, 200));
+  return await res.json();
+}
+
+async function connect() {
+  SB_URL = document.getElementById("sb-url").value.replace(/\/+$/, "");
+  SB_KEY = document.getElementById("sb-key").value.trim();
+  var errEl = document.getElementById("login-error");
+  if (!SB_URL || !SB_KEY) { errEl.textContent = "Both fields are required."; errEl.style.display = "block"; return; }
+  try {
+    errEl.style.display = "none";
+    ROWS = await fetchRows();
+    document.getElementById("login-screen").style.display = "none";
+    document.getElementById("dashboard").style.display = "block";
+    render();
+  } catch (e) { errEl.textContent = "Connection failed: " + e.message; errEl.style.display = "block"; }
+}
+
+async function refresh() {
+  try { ROWS = await fetchRows(); render(); } catch (e) { alert("Refresh failed: " + e.message); }
+}
+
+function computeStats() {
+  var total = ROWS.length;
+  var models = ["gemini", "mistral", "openai"];
+  var modelStats = models.map(function(m) {
+    var valid = ROWS.filter(function(r) { return (r[m + "_score"] != null ? r[m + "_score"] : -1) >= 0; });
+    var scores = valid.map(function(r) { return r[m + "_score"]; });
+    var avg = scores.length ? (scores.reduce(function(a, b) { return a + b; }, 0) / scores.length).toFixed(1) : "\u2014";
+    return { name: m, scored: valid.length, total: total, avg: avg, min: scores.length ? Math.min.apply(null, scores) : "\u2014", max: scores.length ? Math.max.apply(null, scores) : "\u2014", below70: scores.filter(function(s) { return s < 70; }).length };
+  });
+  var consensus = {};
+  ROWS.forEach(function(r) { var c = r.consensus || "NOT_COMPUTED"; consensus[c] = (consensus[c] || 0) + 1; });
+  var flagged = ROWS.filter(function(r) { return r.flag; }).length;
+  return { total: total, modelStats: modelStats, consensus: consensus, flagged: flagged };
+}
+
+function getFiltered() {
+  var f = ROWS;
+  if (currentFilter !== "ALL") f = f.filter(function(r) { return r.consensus === currentFilter; });
+  if (currentSearch) { var q = currentSearch.toLowerCase(); f = f.filter(function(r) { return (r.term || "").toLowerCase().includes(q) || (r.slug || "").toLowerCase().includes(q); }); }
+  return f;
+}
+
+function render() {
+  var stats = computeStats();
+  document.getElementById("subtitle").textContent = "Ensemble verification \u2014 " + stats.total + " keywords scored";
+  var passCount = stats.consensus["ALL_PASS"] || 0;
+  var failCount = stats.consensus["ALL_FAIL"] || 0;
+  var disagreeCount = stats.consensus["DISAGREE"] || 0;
+  document.getElementById("summary-cards").innerHTML = '<div class="card card-green"><div class="num">' + passCount + '</div><div class="label">Approved (ALL_PASS)</div></div><div class="card card-red"><div class="num">' + failCount + '</div><div class="label">Rejected (ALL_FAIL)</div></div><div class="card card-amber"><div class="num">' + disagreeCount + '</div><div class="label">Needs review (DISAGREE)</div></div><div class="card card-gray"><div class="num">' + stats.total + '</div><div class="label">Total keywords</div></div>';
+  document.getElementById("model-cards").innerHTML = stats.modelStats.map(function(m) { return '<div class="model-card"><div class="model-header"><span class="model-name">' + m.name + '</span><span class="model-count" style="color:' + (m.scored === m.total ? "#16a34a" : "#d97706") + '">' + m.scored + '/' + m.total + '</span></div><div class="model-avg">' + m.avg + '</div><div class="model-detail">avg score \u00b7 range ' + m.min + '\u2013' + m.max + ' \u00b7 ' + m.below70 + ' flagged</div></div>'; }).join("");
+  var barHtml = [{ key: "ALL_PASS", count: passCount, cls: "bar-pass" }, { key: "ALL_FAIL", count: failCount, cls: "bar-fail" }, { key: "DISAGREE", count: disagreeCount, cls: "bar-disagree" }].filter(function(d) { return d.count > 0; }).map(function(d) { var pct = ((d.count / stats.total) * 100).toFixed(0); return '<div class="' + d.cls + '" style="width:' + pct + '%;min-width:40px">' + pct + '%</div>'; }).join("");
+  document.getElementById("consensus-bar").innerHTML = barHtml;
+  document.getElementById("consensus-legend").innerHTML = '<span><span class="legend-dot" style="background:#22c55e"></span>ALL_PASS (' + passCount + ')</span><span><span class="legend-dot" style="background:#ef4444"></span>ALL_FAIL (' + failCount + ')</span><span><span class="legend-dot" style="background:#f59e0b"></span>DISAGREE (' + disagreeCount + ')</span>';
+  var filters = [{ key: "ALL", label: "All (" + ROWS.length + ")" }, { key: "ALL_PASS", label: "ALL_PASS (" + passCount + ")" }, { key: "ALL_FAIL", label: "ALL_FAIL (" + failCount + ")" }, { key: "DISAGREE", label: "DISAGREE (" + disagreeCount + ")" }];
+  document.getElementById("filters").innerHTML = filters.map(function(f) { return '<button class="filter-btn ' + (currentFilter === f.key ? "active" : "") + '" onclick="setFilter(\'' + f.key + '\')">' + f.label + '</button>'; }).join("") + '<input class="search-input" placeholder="Search keywords..." value="' + currentSearch + '" oninput="setSearch(this.value)">';
+  renderTable();
+}
+
+function setFilter(f) { currentFilter = f; render(); }
+function setSearch(q) { currentSearch = q; renderTable(); }
+
+function renderTable() {
+  var filtered = getFiltered();
+  var tbody = document.getElementById("table-body");
+  if (!filtered.length) { tbody.innerHTML = '<tr><td colspan="7" class="empty-row">No keywords match your filters.</td></tr>'; return; }
+  tbody.innerHTML = filtered.map(function(row) {
+    var gs = row.gemini_score != null ? row.gemini_score : -1;
+    var ms = row.mistral_score != null ? row.mistral_score : -1;
+    var os = row.openai_score != null ? row.openai_score : -1;
+    var avg = row.avg_score != null ? row.avg_score : -1;
+    var cons = row.consensus || "\u2014";
+    return '<tr class="clickable" onclick="openModal(\'' + row.slug.replace(/'/g, "\\'") + '\')">' +
+      '<td><div class="term-name">' + (row.term || row.slug) + '</div><div class="term-slug">' + row.slug + '</div></td>' +
+      '<td style="color:#666">' + (row.category || "\u2014") + '</td>' +
+      '<td class="center"><span class="score ' + scoreClass(gs) + '">' + scoreDisplay(gs) + '</span></td>' +
+      '<td class="center"><span class="score ' + scoreClass(ms) + '">' + scoreDisplay(ms) + '</span></td>' +
+      '<td class="center"><span class="score ' + scoreClass(os) + '">' + scoreDisplay(os) + '</span></td>' +
+      '<td class="center"><span class="score ' + scoreClass(avg) + '">' + (avg >= 0 ? Math.round(avg) : "\u2014") + '</span></td>' +
+      '<td class="center"><span class="consensus-pill ' + pillClass(cons) + '">' + cons + '</span></td></tr>';
+  }).join("");
+}
+
+function openModal(slug) {
+  var row = ROWS.find(function(r) { return r.slug === slug; });
+  if (!row) return;
+  var cons = row.consensus || "\u2014";
+  var avg = row.avg_score != null ? row.avg_score : -1;
+  var def = row.definition || "No definition available.";
+
+  var modelsHtml = ["gemini", "mistral", "openai"].map(function(m) {
+    var score = row[m + "_score"] != null ? row[m + "_score"] : -1;
+    var tag = row[m + "_tag"] || "\u2014";
+    var issue = row[m + "_issue"] || "No issues noted.";
+    return '<div class="modal-model">' +
+      '<div class="modal-model-header"><span class="modal-model-name">' + m + '</span><span class="modal-model-score" style="color:' + scoreColor(score) + '">' + scoreDisplay(score) + '</span></div>' +
+      '<div class="modal-model-tag">Tag: <span class="' + tagClass(tag) + '">' + tag + '</span></div>' +
+      '<div class="modal-model-issue">' + issue + '</div></div>';
+  }).join("");
+
+  document.getElementById("modal-body").innerHTML =
+    '<div class="modal-header"><div class="modal-title">' + (row.term || row.slug) + '</div></div>' +
+    '<div class="modal-meta"><span class="cat">' + (row.category || "Uncategorized") + '</span><span class="consensus-pill ' + pillClass(cons) + '">' + cons + '</span><span style="font-family:IBM Plex Mono,monospace;font-size:12px;color:#aaa">' + row.slug + '</span></div>' +
+    '<div class="modal-def">' + def + '</div>' +
+    '<div class="modal-avg"><span class="modal-avg-label">Average score</span><span class="modal-avg-score" style="color:' + scoreColor(avg) + '">' + (avg >= 0 ? Math.round(avg) : "\u2014") + '</span></div>' +
+    '<div class="modal-models">' + modelsHtml + '</div>';
+
+  document.getElementById("modal-overlay").classList.add("open");
+  document.body.style.overflow = "hidden";
+}
+
+function closeModal(e) {
+  if (e.target === document.getElementById("modal-overlay")) closeModalDirect();
+}
+function closeModalDirect() {
+  document.getElementById("modal-overlay").classList.remove("open");
+  document.body.style.overflow = "";
+}
+document.addEventListener("keydown", function(e) { if (e.key === "Escape") closeModalDirect(); });
+document.getElementById("sb-key").addEventListener("keydown", function(e) { if (e.key === "Enter") connect(); });
+</script>
+</body>
+</html>

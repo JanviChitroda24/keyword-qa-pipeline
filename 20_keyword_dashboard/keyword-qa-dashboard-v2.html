@@ -1,0 +1,508 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Medhavi Keyword QA — V2</title>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: 'IBM Plex Sans', -apple-system, sans-serif; background: #f5f5f0; color: #222; }
+.container { max-width: 1200px; margin: 0 auto; padding: 24px; }
+
+/* Login */
+.login-wrap { max-width: 440px; margin: 100px auto; }
+.login-wrap h2 { font-size: 24px; font-weight: 700; margin-bottom: 4px; }
+.login-wrap p { color: #777; font-size: 14px; margin-bottom: 28px; }
+.login-wrap label { font-size: 13px; font-weight: 600; color: #555; display: block; margin-bottom: 4px; }
+.login-wrap input { width: 100%; padding: 10px 14px; border: 1.5px solid #ddd; border-radius: 8px; font-size: 14px; margin-bottom: 16px; font-family: inherit; outline: none; }
+.login-wrap input:focus { border-color: #111; }
+.login-wrap button { width: 100%; padding: 13px; background: #111; color: #fff; border: none; border-radius: 8px; font-size: 15px; font-weight: 600; cursor: pointer; font-family: inherit; }
+.login-wrap button:hover { background: #333; }
+.error-msg { color: #dc2626; font-size: 13px; margin-bottom: 12px; }
+
+/* Header */
+.header { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 4px; }
+.header h1 { font-size: 22px; font-weight: 700; letter-spacing: -0.02em; }
+.header .sub { color: #888; font-size: 13px; margin-top: 2px; }
+.refresh-btn { background: none; border: 1.5px solid #ddd; border-radius: 6px; padding: 6px 16px; font-size: 13px; cursor: pointer; color: #555; font-family: inherit; }
+.refresh-btn:hover { border-color: #999; }
+
+/* Action cards */
+.action-cards { display: grid; grid-template-columns: repeat(6, 1fr); gap: 10px; margin: 20px 0; }
+.acard { border-radius: 10px; padding: 14px 16px; text-align: center; }
+.acard .num { font-size: 26px; font-weight: 700; }
+.acard .label { font-size: 11px; margin-top: 2px; }
+.ac-approved { background: #ecfdf5; border: 1px solid #a7f3d0; }
+.ac-approved .num { color: #065f46; }
+.ac-approved .label { color: #065f46; }
+.ac-supplementary { background: #eff6ff; border: 1px solid #bfdbfe; }
+.ac-supplementary .num { color: #1e40af; }
+.ac-supplementary .label { color: #1e40af; }
+.ac-too_basic { background: #f5f5f4; border: 1px solid #d6d3d1; }
+.ac-too_basic .num { color: #57534e; }
+.ac-too_basic .label { color: #57534e; }
+.ac-fix_definition { background: #fffbeb; border: 1px solid #fde68a; }
+.ac-fix_definition .num { color: #92400e; }
+.ac-fix_definition .label { color: #92400e; }
+.ac-junk { background: #fef2f2; border: 1px solid #fecaca; }
+.ac-junk .num { color: #991b1b; }
+.ac-junk .label { color: #991b1b; }
+.ac-review { background: #fdf4ff; border: 1px solid #e9d5ff; }
+.ac-review .num { color: #7e22ce; }
+.ac-review .label { color: #7e22ce; }
+
+/* Model cards */
+.models { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin: 0 0 20px; }
+.model-card { border: 1px solid #e8e8e8; border-radius: 12px; padding: 16px 18px; background: #fff; }
+.model-card .model-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px; }
+.model-card .model-name { font-size: 13px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; color: #444; }
+.model-card .model-count { font-size: 12px; }
+.model-card .model-avg { font-size: 30px; font-weight: 700; color: #111; }
+.model-card .model-detail { font-size: 11px; color: #999; margin-top: 2px; }
+.model-card .tag-dist { display: flex; gap: 4px; margin-top: 8px; flex-wrap: wrap; }
+.model-card .tag-chip { font-size: 10px; padding: 2px 8px; border-radius: 10px; font-weight: 600; }
+
+/* Action bar */
+.action-bar-section { margin: 0 0 20px; }
+.action-bar-label { font-size: 13px; font-weight: 600; color: #444; margin-bottom: 6px; }
+.action-bar { display: flex; height: 34px; border-radius: 8px; overflow: hidden; border: 1px solid #e0e0e0; }
+.action-bar div { display: flex; align-items: center; justify-content: center; color: #fff; font-size: 11px; font-weight: 700; transition: width 0.4s ease; white-space: nowrap; }
+.bar-approved { background: #10b981; }
+.bar-supplementary { background: #3b82f6; }
+.bar-too_basic { background: #78716c; }
+.bar-fix_definition { background: #f59e0b; }
+.bar-junk { background: #ef4444; }
+.bar-review { background: #a855f7; }
+.action-legend { display: flex; gap: 14px; margin-top: 6px; font-size: 11px; color: #777; flex-wrap: wrap; }
+.legend-dot { display: inline-block; width: 8px; height: 8px; border-radius: 50%; margin-right: 4px; vertical-align: middle; }
+
+/* Filters */
+.filters { display: flex; gap: 6px; margin: 0 0 14px; align-items: center; flex-wrap: wrap; }
+.filter-btn { padding: 5px 14px; border-radius: 6px; font-size: 11px; font-weight: 600; cursor: pointer; border: 1.5px solid #ddd; background: #fff; color: #555; font-family: inherit; transition: all 0.15s; }
+.filter-btn:hover { border-color: #aaa; }
+.filter-btn.active { border: 2px solid #111; background: #111; color: #fff; }
+.search-input { margin-left: auto; padding: 7px 14px; border: 1.5px solid #ddd; border-radius: 6px; font-size: 13px; width: 220px; outline: none; font-family: inherit; }
+.search-input:focus { border-color: #111; }
+
+/* Table */
+.table-wrap { border: 1px solid #e4e4e4; border-radius: 12px; overflow: hidden; background: #fff; }
+table { width: 100%; border-collapse: collapse; font-size: 13px; }
+thead tr { background: #fafafa; border-bottom: 1px solid #e4e4e4; }
+th { text-align: left; padding: 10px 12px; font-weight: 600; color: #666; font-size: 11px; text-transform: uppercase; letter-spacing: 0.04em; }
+th.center { text-align: center; }
+td { padding: 10px 12px; border-bottom: 1px solid #f3f3f3; }
+td.center { text-align: center; }
+tr.clickable { cursor: pointer; transition: background 0.15s; }
+tr.clickable:hover { background: #f8f9ff; }
+tr.selected { background: #f0f2ff; }
+.term-name { font-weight: 500; color: #222; }
+.term-slug { font-size: 11px; color: #aaa; font-family: 'IBM Plex Mono', monospace; }
+.score { font-weight: 700; font-size: 14px; font-family: 'IBM Plex Mono', monospace; }
+.score-green { color: #16a34a; }
+.score-blue { color: #2563eb; }
+.score-amber { color: #d97706; }
+.score-red { color: #dc2626; }
+.score-gray { color: #ccc; }
+
+/* Action pills */
+.action-pill { padding: 3px 10px; border-radius: 12px; font-size: 10px; font-weight: 700; display: inline-block; text-transform: uppercase; letter-spacing: 0.03em; }
+.pill-approved { background: #d1fae5; color: #065f46; }
+.pill-supplementary { background: #dbeafe; color: #1e40af; }
+.pill-too_basic { background: #e7e5e4; color: #44403c; }
+.pill-fix_definition { background: #fef3c7; color: #92400e; }
+.pill-junk { background: #fee2e2; color: #991b1b; }
+.pill-review { background: #f3e8ff; color: #7e22ce; }
+.pill-default { background: #f3f4f6; color: #555; }
+
+/* Pagination */
+.pagination { display: flex; justify-content: space-between; align-items: center; margin-top: 12px; font-size: 13px; color: #666; }
+.pagination button { padding: 6px 16px; border: 1.5px solid #ddd; border-radius: 6px; background: #fff; cursor: pointer; font-family: inherit; font-size: 12px; }
+.pagination button:hover { border-color: #999; }
+.pagination button:disabled { opacity: 0.4; cursor: default; }
+
+/* Detail panel */
+.detail-panel { margin-top: 16px; border: 1px solid #e0e0e0; border-radius: 12px; padding: 20px 22px; background: #fafafa; }
+.detail-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px; }
+.detail-header h3 { font-size: 17px; font-weight: 600; }
+.detail-meta { font-size: 12px; color: #888; margin-bottom: 10px; }
+.detail-def { font-size: 13px; color: #555; line-height: 1.7; margin-bottom: 16px; padding: 12px 14px; background: #fff; border: 1px solid #eee; border-radius: 8px; }
+.detail-models { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
+.detail-model { border: 1px solid #e8e8e8; border-radius: 8px; padding: 12px 14px; background: #fff; }
+.detail-model-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px; }
+.detail-model-name { font-size: 12px; font-weight: 700; text-transform: uppercase; color: #555; }
+.detail-model-score { font-size: 22px; font-weight: 700; }
+.detail-model-tag { font-size: 11px; margin-top: 4px; }
+.detail-model-issue { font-size: 11px; color: #777; line-height: 1.5; margin-top: 6px; }
+
+/* Loading */
+.loading { text-align: center; padding: 60px; color: #999; }
+.loading .spinner { display: inline-block; width: 20px; height: 20px; border: 2.5px solid #ddd; border-top-color: #111; border-radius: 50%; animation: spin 0.6s linear infinite; margin-bottom: 12px; }
+@keyframes spin { to { transform: rotate(360deg); } }
+
+.empty-row { text-align: center; padding: 40px; color: #aaa; font-size: 14px; }
+
+@media (max-width: 768px) {
+  .action-cards { grid-template-columns: repeat(3, 1fr); }
+  .models { grid-template-columns: 1fr; }
+  .detail-models { grid-template-columns: 1fr; }
+  .filters { flex-direction: column; align-items: stretch; }
+  .search-input { margin-left: 0; width: 100%; }
+}
+</style>
+</head>
+<body>
+
+<!-- LOGIN -->
+<div id="login-screen" class="login-wrap">
+  <h2>Medhavi keyword QA</h2>
+  <p>Connect to Supabase to view ensemble scoring results for <strong>keyword_scores_v2</strong>.</p>
+  <label>Supabase URL</label>
+  <input id="sb-url" placeholder="https://abc123.supabase.co" value="">
+  <label>Supabase key (anon or service role)</label>
+  <input id="sb-key" type="password" placeholder="eyJhbG...">
+  <div id="login-error" class="error-msg" style="display:none"></div>
+  <button onclick="connect()">Connect</button>
+</div>
+
+<!-- DASHBOARD -->
+<div id="dashboard" class="container" style="display:none">
+  <div class="header">
+    <div>
+      <h1>Medhavi keyword QA</h1>
+      <div class="sub" id="subtitle"></div>
+    </div>
+    <button class="refresh-btn" onclick="refresh()">Refresh</button>
+  </div>
+
+  <div class="action-cards" id="action-cards"></div>
+  <div class="models" id="model-cards"></div>
+
+  <div class="action-bar-section">
+    <div class="action-bar-label">Action distribution</div>
+    <div class="action-bar" id="action-bar"></div>
+    <div class="action-legend" id="action-legend"></div>
+  </div>
+
+  <div class="filters" id="filters"></div>
+  <div class="table-wrap">
+    <table>
+      <thead>
+        <tr>
+          <th>Keyword</th>
+          <th>Category</th>
+          <th class="center" style="width:60px">Mistral</th>
+          <th class="center" style="width:60px">OpenAI</th>
+          <th class="center" style="width:60px">Claude</th>
+          <th class="center" style="width:50px">Avg</th>
+          <th class="center" style="width:110px">Action</th>
+        </tr>
+      </thead>
+      <tbody id="table-body"></tbody>
+    </table>
+  </div>
+  <div class="pagination" id="pagination"></div>
+  <div id="detail-panel" class="detail-panel" style="display:none"></div>
+</div>
+
+<script>
+const TABLE = "keyword_scores_v2";
+const MODELS = ["mistral", "openai", "claude"];
+const VALID_ACTIONS = ["approved", "supplementary", "too_basic", "fix_definition", "junk", "REVIEW"];
+const ACTION_COLORS = {
+  approved: "#10b981", supplementary: "#3b82f6", too_basic: "#78716c",
+  fix_definition: "#f59e0b", junk: "#ef4444", REVIEW: "#a855f7"
+};
+const ACTION_LABELS = {
+  approved: "Show popup", supplementary: "Show (supporting)", too_basic: "Hide",
+  fix_definition: "Regenerate", junk: "Delete", REVIEW: "Human review"
+};
+const PAGE_SIZE = 100;
+
+let ROWS = [];
+let SB_URL = "";
+let SB_KEY = "";
+let currentFilter = "ALL";
+let currentSearch = "";
+let selectedSlug = null;
+let currentPage = 0;
+
+function scoreClass(s) {
+  if (s == null || s < 0) return "score-gray";
+  if (s >= 90) return "score-green";
+  if (s >= 70) return "score-blue";
+  if (s >= 50) return "score-amber";
+  return "score-red";
+}
+
+function actionPillClass(a) {
+  const map = {
+    approved: "pill-approved", supplementary: "pill-supplementary",
+    too_basic: "pill-too_basic", fix_definition: "pill-fix_definition",
+    junk: "pill-junk", REVIEW: "pill-review"
+  };
+  return map[a] || "pill-default";
+}
+
+function tagPillClass(t) {
+  const map = {
+    approved: "pill-approved", supplementary: "pill-supplementary",
+    too_basic: "pill-too_basic", fix_definition: "pill-fix_definition",
+    junk: "pill-junk"
+  };
+  return map[t] || "pill-default";
+}
+
+function scoreDisplay(s) { return (s != null && s >= 0) ? s : "—"; }
+
+async function fetchAllRows() {
+  let all = [];
+  let offset = 0;
+  const limit = 1000;
+  while (true) {
+    const res = await fetch(
+      `${SB_URL}/rest/v1/${TABLE}?select=*&order=id.asc&limit=${limit}&offset=${offset}`,
+      { headers: { apikey: SB_KEY, Authorization: `Bearer ${SB_KEY}` } }
+    );
+    if (!res.ok) throw new Error(`HTTP ${res.status}: ${await res.text()}`);
+    const batch = await res.json();
+    all = all.concat(batch);
+    if (batch.length < limit) break;
+    offset += limit;
+  }
+  return all;
+}
+
+async function connect() {
+  SB_URL = document.getElementById("sb-url").value.replace(/\/+$/, "");
+  SB_KEY = document.getElementById("sb-key").value.trim();
+  const errEl = document.getElementById("login-error");
+
+  if (!SB_URL || !SB_KEY) {
+    errEl.textContent = "Both fields are required.";
+    errEl.style.display = "block";
+    return;
+  }
+
+  try {
+    errEl.style.display = "none";
+    errEl.textContent = "";
+    document.querySelector(".login-wrap button").textContent = "Connecting...";
+    ROWS = await fetchAllRows();
+    document.getElementById("login-screen").style.display = "none";
+    document.getElementById("dashboard").style.display = "block";
+    render();
+  } catch (e) {
+    errEl.textContent = `Connection failed: ${e.message}`;
+    errEl.style.display = "block";
+    document.querySelector(".login-wrap button").textContent = "Connect";
+  }
+}
+
+async function refresh() {
+  try {
+    ROWS = await fetchAllRows();
+    render();
+  } catch (e) {
+    alert("Refresh failed: " + e.message);
+  }
+}
+
+function actionCounts() {
+  const counts = {};
+  ROWS.forEach(r => {
+    const a = r.action || "UNKNOWN";
+    counts[a] = (counts[a] || 0) + 1;
+  });
+  return counts;
+}
+
+function render() {
+  const total = ROWS.length;
+  const ac = actionCounts();
+
+  document.getElementById("subtitle").textContent =
+    `V2 ensemble — ${total.toLocaleString()} keywords · 3 models · 5 tags`;
+
+  // Action cards
+  const cardOrder = ["approved", "supplementary", "too_basic", "fix_definition", "junk", "REVIEW"];
+  document.getElementById("action-cards").innerHTML = cardOrder.map(a => {
+    const count = ac[a] || 0;
+    const pct = total ? ((count / total) * 100).toFixed(1) : 0;
+    return `<div class="acard ac-${a}">
+      <div class="num">${count.toLocaleString()}</div>
+      <div class="label">${ACTION_LABELS[a]} (${pct}%)</div>
+    </div>`;
+  }).join("");
+
+  // Model cards
+  document.getElementById("model-cards").innerHTML = MODELS.map(m => {
+    const valid = ROWS.filter(r => (r[`${m}_score`] ?? -1) >= 0);
+    const scores = valid.map(r => r[`${m}_score`]);
+    const avg = scores.length ? (scores.reduce((a, b) => a + b, 0) / scores.length).toFixed(1) : "—";
+    const below = scores.filter(s => s < 70).length;
+
+    // Tag distribution
+    const tags = {};
+    valid.forEach(r => {
+      const t = r[`${m}_tag`] || "unknown";
+      tags[t] = (tags[t] || 0) + 1;
+    });
+    const tagChips = Object.entries(tags)
+      .sort((a, b) => b[1] - a[1])
+      .slice(0, 5)
+      .map(([t, c]) => `<span class="tag-chip action-pill ${tagPillClass(t)}">${t} ${c}</span>`)
+      .join("");
+
+    return `<div class="model-card">
+      <div class="model-header">
+        <span class="model-name">${m}</span>
+        <span class="model-count" style="color:${valid.length === total ? '#16a34a' : '#d97706'}">${valid.length}/${total}</span>
+      </div>
+      <div class="model-avg">${avg}</div>
+      <div class="model-detail">avg score · ${below} below 70</div>
+      <div class="tag-dist">${tagChips}</div>
+    </div>`;
+  }).join("");
+
+  // Action bar
+  const barOrder = ["approved", "supplementary", "too_basic", "fix_definition", "junk", "REVIEW"];
+  document.getElementById("action-bar").innerHTML = barOrder
+    .filter(a => (ac[a] || 0) > 0)
+    .map(a => {
+      const pct = ((ac[a] / total) * 100).toFixed(0);
+      return `<div class="bar-${a}" style="background:${ACTION_COLORS[a]};width:${pct}%;min-width:${pct > 3 ? '0' : '30'}px">${pct > 4 ? pct + '%' : ''}</div>`;
+    }).join("");
+
+  document.getElementById("action-legend").innerHTML = barOrder.map(a => {
+    const count = ac[a] || 0;
+    return count ? `<span><span class="legend-dot" style="background:${ACTION_COLORS[a]}"></span>${a} (${count})</span>` : '';
+  }).join("");
+
+  // Filters
+  const filterItems = [
+    { key: "ALL", label: `All (${total})` },
+    ...barOrder.map(a => ({ key: a, label: `${a} (${ac[a] || 0})` }))
+  ];
+  document.getElementById("filters").innerHTML = filterItems.map(f =>
+    `<button class="filter-btn ${currentFilter === f.key ? 'active' : ''}" onclick="setFilter('${f.key}')">${f.label}</button>`
+  ).join("") + `<input class="search-input" placeholder="Search keywords..." value="${currentSearch}" oninput="setSearch(this.value)">`;
+
+  currentPage = 0;
+  renderTable();
+}
+
+function setFilter(f) { currentFilter = f; currentPage = 0; render(); }
+function setSearch(q) { currentSearch = q; currentPage = 0; renderTable(); }
+
+function getFiltered() {
+  let f = ROWS;
+  if (currentFilter !== "ALL") f = f.filter(r => (r.action || "") === currentFilter);
+  if (currentSearch) {
+    const q = currentSearch.toLowerCase();
+    f = f.filter(r => (r.term || "").toLowerCase().includes(q) || (r.slug || "").toLowerCase().includes(q));
+  }
+  return f;
+}
+
+function renderTable() {
+  const filtered = getFiltered();
+  const totalPages = Math.ceil(filtered.length / PAGE_SIZE);
+  const pageRows = filtered.slice(currentPage * PAGE_SIZE, (currentPage + 1) * PAGE_SIZE);
+  const tbody = document.getElementById("table-body");
+
+  if (!filtered.length) {
+    tbody.innerHTML = `<tr><td colspan="7" class="empty-row">No keywords match your filters.</td></tr>`;
+    document.getElementById("detail-panel").style.display = "none";
+    document.getElementById("pagination").innerHTML = "";
+    return;
+  }
+
+  tbody.innerHTML = pageRows.map(row => {
+    const ms = row.mistral_score ?? -1;
+    const os = row.openai_score ?? -1;
+    const cs = row.claude_score ?? -1;
+    const avg = row.avg_score ?? -1;
+    const action = row.action || "—";
+
+    return `<tr class="clickable ${selectedSlug === row.slug ? 'selected' : ''}" onclick="selectRow('${row.slug}')">
+      <td><div class="term-name">${row.term || row.slug}</div><div class="term-slug">${row.slug}</div></td>
+      <td style="color:#666;font-size:12px">${row.category || "—"}</td>
+      <td class="center"><span class="score ${scoreClass(ms)}">${scoreDisplay(ms)}</span></td>
+      <td class="center"><span class="score ${scoreClass(os)}">${scoreDisplay(os)}</span></td>
+      <td class="center"><span class="score ${scoreClass(cs)}">${scoreDisplay(cs)}</span></td>
+      <td class="center"><span class="score ${scoreClass(avg)}">${avg >= 0 ? Math.round(avg) : "—"}</span></td>
+      <td class="center"><span class="action-pill ${actionPillClass(action)}">${action}</span></td>
+    </tr>`;
+  }).join("");
+
+  // Pagination
+  const start = currentPage * PAGE_SIZE + 1;
+  const end = Math.min((currentPage + 1) * PAGE_SIZE, filtered.length);
+  document.getElementById("pagination").innerHTML = `
+    <span>${start}–${end} of ${filtered.length.toLocaleString()}</span>
+    <div>
+      <button ${currentPage === 0 ? 'disabled' : ''} onclick="goPage(${currentPage - 1})">← Prev</button>
+      <button ${currentPage >= totalPages - 1 ? 'disabled' : ''} onclick="goPage(${currentPage + 1})">Next →</button>
+    </div>
+  `;
+
+  if (selectedSlug) {
+    const row = ROWS.find(r => r.slug === selectedSlug);
+    if (row) renderDetail(row);
+  }
+}
+
+function goPage(p) { currentPage = p; renderTable(); window.scrollTo({ top: document.querySelector('.table-wrap').offsetTop - 20, behavior: 'smooth' }); }
+
+function selectRow(slug) {
+  selectedSlug = selectedSlug === slug ? null : slug;
+  renderTable();
+  if (!selectedSlug) document.getElementById("detail-panel").style.display = "none";
+}
+
+function renderDetail(row) {
+  const panel = document.getElementById("detail-panel");
+  const action = row.action || "—";
+  const tagCons = row.tag_consensus || "—";
+  const def = row.definition
+    ? ((row.definition.length > 500 ? row.definition.slice(0, 500) + "..." : row.definition))
+    : "<em style='color:#bbb'>No definition</em>";
+
+  const modelCards = MODELS.map(m => {
+    const score = row[`${m}_score`] ?? -1;
+    const tag = row[`${m}_tag`] || "—";
+    const issue = row[`${m}_issue`] || "—";
+    return `<div class="detail-model">
+      <div class="detail-model-header">
+        <span class="detail-model-name">${m}</span>
+        <span class="detail-model-score ${scoreClass(score)}">${scoreDisplay(score)}</span>
+      </div>
+      <div class="detail-model-tag"><span class="action-pill ${tagPillClass(tag)}" style="font-size:10px">${tag}</span></div>
+      <div class="detail-model-issue">${issue === "none" ? "No issues" : issue}</div>
+    </div>`;
+  }).join("");
+
+  panel.innerHTML = `
+    <div class="detail-header">
+      <h3>${row.term || row.slug}</h3>
+      <span class="action-pill ${actionPillClass(action)}" style="font-size:12px;padding:4px 14px">${action}</span>
+    </div>
+    <div class="detail-meta">
+      Category: <strong>${row.category || "—"}</strong> · 
+      Avg score: <strong>${row.avg_score >= 0 ? row.avg_score.toFixed(1) : "—"}</strong> · 
+      Tag consensus: <strong>${tagCons}</strong> · 
+      Score consensus: <strong>${row.consensus || "—"}</strong>
+    </div>
+    <div class="detail-def">${def}</div>
+    <div class="detail-models">${modelCards}</div>
+  `;
+  panel.style.display = "block";
+}
+
+document.getElementById("sb-key").addEventListener("keydown", e => {
+  if (e.key === "Enter") connect();
+});
+</script>
+</body>
+</html>

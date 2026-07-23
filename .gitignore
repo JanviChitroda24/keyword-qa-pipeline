@@ -1,0 +1,21 @@
+__pycache__/
+*.pyc
+.env
+*.log
+
+# Generated scoring outputs — regenerate by running the stages
+results_v2/
+results_prod/
+results_acronyms/
+claude_batches_v2/
+claude_batches/
+exports/
+*_scored.csv
+*_for_claude.csv
+claude_all_scored*.csv
+comparison_report*.csv
+summary*.txt
+debug_responses/
+
+# Local test artifacts
+sample_data/test_*
