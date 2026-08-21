@@ -61,8 +61,20 @@ keyword-qa-pipeline/
 │   └── acronym-qa-dashboard.html
 │
 ├── reference/                        earlier v1 scripts + original step notes
-└── sample_data/                      tiny JSONL samples for smoke tests
+├── sample_data/                      tiny JSONL samples for smoke tests
+├── agreement_metrics.py              Inter-rater agreement (Fleiss / Cohen) → Markdown report
+└── AGREEMENT_METRICS.md              how to run agreement_metrics.py
 ```
+
+After ensemble, optional agreement metrics (writes `Final_Result/agreement_report.md`):
+
+```bash
+python3 agreement_metrics.py --demo
+python3 agreement_metrics.py --jsonl Final_Result/keywords_combined.jsonl
+python3 agreement_metrics.py --supabase   # needs QA_SUPABASE_* (same as stages 10–18)
+```
+
+See `AGREEMENT_METRICS.md` for full details.
 
 Stages that share one CLI use a thin `run_pipeline.py` wrapper so you can stay inside that stage folder. The real logic lives in `10_keyword_setup/ensemble_pipeline_v2.py` (keywords) and `21_acronym_setup/acronym_pipeline.py` (acronyms).
 
@@ -305,6 +317,7 @@ Open tails: fix defs `cd39, nca, pi3, dtp, hdi` · REVIEW `atp, cns, adp, nf, ra
 
 ## Read Next
 
+- **`JANVI_WORK_SUMMARY.md`** — full formal summary of Janvi’s QA work (architecture, scripts, metrics, challenges, pending)
 - **`DESIGN.md`** — decision design: what / why / how (start here if rebuilding for a new textbook)
 - **`RESULTS.md`** — final oncology keyword + acronym counts and open tails
 - **`KEYWORD_QA_PIPELINE_DOCS.md`** — full per-stage documentation, schemas, consensus rules, handoff checklist
